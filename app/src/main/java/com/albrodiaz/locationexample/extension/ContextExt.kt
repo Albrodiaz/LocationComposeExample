@@ -1,4 +1,4 @@
-package com.albrodiaz.locationexample
+package com.albrodiaz.locationexample.extension
 
 import android.Manifest
 import android.content.Context
