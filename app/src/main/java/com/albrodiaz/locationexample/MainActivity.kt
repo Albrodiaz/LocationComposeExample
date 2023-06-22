@@ -35,10 +35,12 @@ import com.albrodiaz.locationexample.extension.hasLocationPermission
 import com.albrodiaz.locationexample.ui.theme.LocationExampleTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -97,17 +99,18 @@ class MainActivity : ComponentActivity() {
                                         this.location?.latitude ?: 0.0,
                                         this.location?.longitude ?: 0.0
                                     )
+                                val cameraState = rememberCameraPositionState()
+
+                                LaunchedEffect(key1 = currentLoc) {
+                                    cameraState.centerOnLocation(currentLoc)
+                                }
+
                                 MainScreen(
                                     currentPosition = LatLng(
                                         currentLoc.latitude,
                                         currentLoc.longitude
                                     ),
-                                    cameraState = rememberCameraPositionState {
-                                        position = CameraPosition.fromLatLngZoom(
-                                            currentLoc,
-                                            15f
-                                        )
-                                    }
+                                    cameraState = cameraState
                                 )
                             }
                         }
@@ -123,7 +126,11 @@ fun MainScreen(currentPosition: LatLng, cameraState: CameraPositionState) {
     val marker = LatLng(currentPosition.latitude, currentPosition.longitude)
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraState
+        cameraPositionState = cameraState,
+        properties = MapProperties(
+            isMyLocationEnabled = true,
+            mapType = MapType.HYBRID, isTrafficEnabled = true
+        )
     ) {
         Marker(state = MarkerState(position = marker), title = "Albrodiaz", snippet = "Marker")
     }
@@ -161,3 +168,13 @@ fun RationaleAlert(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         }
     }
 }
+
+private suspend fun CameraPositionState.centerOnLocation(
+    location: LatLng
+) = animate(
+    update = CameraUpdateFactory.newLatLngZoom(
+        location,
+        15f
+    ),
+    durationMs = 1500
+)
