@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
             val permissionState = rememberMultiplePermissionsState(permissions = permissions)
             val locationViewModel: MainActivityVM = hiltViewModel()
 
-            val location by locationViewModel.location.collectAsState()
+            val viewState by locationViewModel.viewState.collectAsState()
 
             LocationExampleTheme {
                 Surface(
@@ -80,9 +80,13 @@ class MainActivity : ComponentActivity() {
                         RationaleAlert(onDismiss = { }) {
                             permissionState.launchMultiplePermissionRequest()
                         }
+                    } else if (!permissionState.allPermissionsGranted) {
+                        Text(text = "Permission not garanted")
+                    } else if (permissionState.allPermissionsGranted) {
+                        Text(text = "Permission granted")
                     }
 
-                    with(location) {
+                    with(viewState) {
                         when (this) {
                             ViewState.Loading -> {
                                 Box(

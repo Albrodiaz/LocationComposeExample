@@ -20,7 +20,7 @@ class MainActivityVM @Inject constructor(
     getLocationUseCase: GetLocationUseCase
 ) : ViewModel() {
 
-    val location: StateFlow<ViewState> =
+    val viewState: StateFlow<ViewState> =
         getLocationUseCase.invoke().map(ViewState::Success)
             .catch { error -> error.printStackTrace() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ViewState.Loading)

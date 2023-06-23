@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.albrodiaz.locationexample.extension.hasLocationPermission
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -24,6 +25,11 @@ class LocationService @Inject constructor(
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.S)
     fun requestLocationUpdates(): Flow<Location?> = callbackFlow {
+
+        if (!context.hasLocationPermission()) {
+            trySend(null)
+            return@callbackFlow
+        }
 
         val request = LocationRequest.Builder(10000L)
             .setIntervalMillis(10000L)
