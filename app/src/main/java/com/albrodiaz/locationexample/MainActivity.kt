@@ -2,11 +2,14 @@ package com.albrodiaz.locationexample
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -76,14 +80,20 @@ class MainActivity : ComponentActivity() {
                         permissionState.launchMultiplePermissionRequest()
                     }
 
-                    if (permissionState.shouldShowRationale) {
-                        RationaleAlert(onDismiss = { }) {
-                            permissionState.launchMultiplePermissionRequest()
+                    when {
+                        permissionState.allPermissionsGranted -> {
+                            locationViewModel.handle(PermissionEvent.Granted)
                         }
-                    } else if (!permissionState.allPermissionsGranted) {
-                        Text(text = "Permission not garanted")
-                    } else if (permissionState.allPermissionsGranted) {
-                        Text(text = "Permission granted")
+
+                        permissionState.shouldShowRationale -> {
+                            RationaleAlert(onDismiss = {  }) {
+                                permissionState.launchMultiplePermissionRequest()
+                            }
+                        }
+
+                        !permissionState.allPermissionsGranted && !permissionState.shouldShowRationale -> {
+                            locationViewModel.handle(PermissionEvent.Revoked)
+                        }
                     }
 
                     with(viewState) {
@@ -94,6 +104,21 @@ class MainActivity : ComponentActivity() {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator()
+                                }
+                            }
+
+                            ViewState.RevokedPermissions -> {
+                                Column(
+                                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text("Necesitamos los permisos para usar esta aplicación")
+                                    Button(onClick = {
+                                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                                    }) {
+                                        Text("Ir a ajustes")
+                                    }
                                 }
                             }
 

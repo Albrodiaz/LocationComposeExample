@@ -7,28 +7,43 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.albrodiaz.locationexample.domain.GetLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.S)
 @HiltViewModel
 class MainActivityVM @Inject constructor(
-    getLocationUseCase: GetLocationUseCase
+    private val getLocationUseCase: GetLocationUseCase
 ) : ViewModel() {
 
-    val viewState: StateFlow<ViewState> =
-        getLocationUseCase.invoke().map(ViewState::Success)
-            .catch { error -> error.printStackTrace() }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ViewState.Loading)
+    val viewState: MutableStateFlow<ViewState> = MutableStateFlow(ViewState.Loading)
 
+    fun handle(event: PermissionEvent) {
+        when (event) {
+            PermissionEvent.Granted -> {
+                viewModelScope.launch {
+                    getLocationUseCase.invoke().collect {
+                        viewState.value = ViewState.Success(it)
+                    }
+                }
+            }
+
+            PermissionEvent.Revoked -> {
+                viewState.value = ViewState.RevokedPermissions
+            }
+        }
+    }
 
 }
 
 sealed interface ViewState {
     object Loading : ViewState
     data class Success(val location: Location?) : ViewState
+    object RevokedPermissions : ViewState
+}
+
+sealed interface PermissionEvent {
+    object Granted : PermissionEvent
+    object Revoked : PermissionEvent
 }

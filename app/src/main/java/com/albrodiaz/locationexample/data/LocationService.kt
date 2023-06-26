@@ -21,10 +21,10 @@ import javax.inject.Inject
 class LocationService @Inject constructor(
     private val context: Context,
     private val locationClient: FusedLocationProviderClient
-) {
+): ILocationService {
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.S)
-    fun requestLocationUpdates(): Flow<Location?> = callbackFlow {
+    override fun requestLocationUpdates(): Flow<Location?> = callbackFlow {
 
         if (!context.hasLocationPermission()) {
             trySend(null)
@@ -55,6 +55,10 @@ class LocationService @Inject constructor(
         awaitClose {
             locationClient.removeLocationUpdates(locationCallback)
         }
+    }
+
+    override fun requestCurrentLocation(): Flow<Location?> {
+        TODO("Not yet implemented")
     }
 
 }
