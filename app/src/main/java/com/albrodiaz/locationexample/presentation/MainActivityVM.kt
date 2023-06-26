@@ -8,6 +8,7 @@ import com.albrodiaz.locationexample.domain.GetLocationUseCase
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,20 +18,21 @@ class MainActivityVM @Inject constructor(
     private val getLocationUseCase: GetLocationUseCase
 ) : ViewModel() {
 
-    val viewState: MutableStateFlow<ViewState> = MutableStateFlow(ViewState.Loading)
+    private val _viewState: MutableStateFlow<ViewState> = MutableStateFlow(ViewState.Loading)
+    val viewState = _viewState.asStateFlow()
 
     fun handle(event: PermissionEvent) {
         when (event) {
             PermissionEvent.Granted -> {
                 viewModelScope.launch {
                     getLocationUseCase.invoke().collect {
-                        viewState.value = ViewState.Success(it)
+                        _viewState.value = ViewState.Success(it)
                     }
                 }
             }
 
             PermissionEvent.Revoked -> {
-                viewState.value = ViewState.RevokedPermissions
+                _viewState.value = ViewState.RevokedPermissions
             }
         }
     }

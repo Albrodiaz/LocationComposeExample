@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.AlertDialogDefaults
@@ -32,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -116,13 +118,15 @@ class MainActivity : ComponentActivity() {
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text("Necesitamos los permisos para usar esta aplicación")
+                                    Text("We need permissions to use this app")
                                     Button(
                                         onClick = {
                                             startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                                        }
+                                        },
+                                        enabled = !hasLocationPermission()
                                     ) {
-                                        Text("Ir a ajustes")
+                                        if (hasLocationPermission()) CircularProgressIndicator(modifier = Modifier.size(14.dp), color = Color.White)
+                                        else Text("Settings")
                                     }
                                 }
                             }
