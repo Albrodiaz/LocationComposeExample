@@ -1,4 +1,4 @@
-package com.albrodiaz.locationexample
+package com.albrodiaz.locationexample.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.albrodiaz.locationexample.extension.hasLocationPermission
 import com.albrodiaz.locationexample.ui.theme.LocationExampleTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -58,15 +58,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val locationViewModel: MainActivityVM by viewModels()
+
         setContent {
 
-            val permissions = listOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+            val permissionState = rememberMultiplePermissionsState(
+                permissions = listOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
             )
-
-            val permissionState = rememberMultiplePermissionsState(permissions = permissions)
-            val locationViewModel: MainActivityVM = hiltViewModel()
 
             val viewState by locationViewModel.viewState.collectAsState()
 
@@ -76,7 +77,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    LaunchedEffect(!this.hasLocationPermission()) {
+                    LaunchedEffect(!hasLocationPermission()) {
                         permissionState.launchMultiplePermissionRequest()
                     }
 
@@ -86,7 +87,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         permissionState.shouldShowRationale -> {
-                            RationaleAlert(onDismiss = {  }) {
+                            RationaleAlert(onDismiss = { }) {
                                 permissionState.launchMultiplePermissionRequest()
                             }
                         }
@@ -109,14 +110,18 @@ class MainActivity : ComponentActivity() {
 
                             ViewState.RevokedPermissions -> {
                                 Column(
-                                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(24.dp),
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text("Necesitamos los permisos para usar esta aplicación")
-                                    Button(onClick = {
-                                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                                    }) {
+                                    Button(
+                                        onClick = {
+                                            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                                        }
+                                    ) {
                                         Text("Ir a ajustes")
                                     }
                                 }

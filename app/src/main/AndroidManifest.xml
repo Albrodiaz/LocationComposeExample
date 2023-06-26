@@ -23,7 +23,7 @@
             android:value="${API_KEY}" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.LocationExample">
             <intent-filter>

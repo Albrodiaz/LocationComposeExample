@@ -1,11 +1,11 @@
-package com.albrodiaz.locationexample
+package com.albrodiaz.locationexample.presentation
 
-import android.location.Location
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.albrodiaz.locationexample.domain.GetLocationUseCase
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -39,7 +39,7 @@ class MainActivityVM @Inject constructor(
 
 sealed interface ViewState {
     object Loading : ViewState
-    data class Success(val location: Location?) : ViewState
+    data class Success(val location: LatLng?) : ViewState
     object RevokedPermissions : ViewState
 }
 

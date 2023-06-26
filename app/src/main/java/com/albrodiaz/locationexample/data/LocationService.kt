@@ -2,7 +2,6 @@ package com.albrodiaz.locationexample.data
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.util.Log
@@ -13,6 +12,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -24,7 +24,7 @@ class LocationService @Inject constructor(
 ): ILocationService {
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.S)
-    override fun requestLocationUpdates(): Flow<Location?> = callbackFlow {
+    override fun requestLocationUpdates(): Flow<LatLng?> = callbackFlow {
 
         if (!context.hasLocationPermission()) {
             trySend(null)
@@ -40,7 +40,7 @@ class LocationService @Inject constructor(
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 locationResult.locations.lastOrNull()?.let {
-                    trySend(it)
+                    trySend(LatLng(it.latitude, it.longitude))
                     Log.i("alberto", "onLocationResult: $it")
                 }
             }
@@ -57,7 +57,7 @@ class LocationService @Inject constructor(
         }
     }
 
-    override fun requestCurrentLocation(): Flow<Location?> {
+    override fun requestCurrentLocation(): Flow<LatLng?> {
         TODO("Not yet implemented")
     }
 

@@ -18,7 +18,7 @@ object LocationModule {
     @Provides
     fun provideLocationClient(
         @ApplicationContext context: Context
-    ) = LocationService(
+    ): ILocationService = LocationService(
         context,
         LocationServices.getFusedLocationProviderClient(context)
     )
