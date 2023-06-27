@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.albrodiaz.locationexample.extension.hasLocationPermission
 import com.albrodiaz.locationexample.ui.theme.LocationExampleTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
-            val viewState by locationViewModel.viewState.collectAsState()
+            val viewState by locationViewModel.viewState.collectAsStateWithLifecycle()
 
             LocationExampleTheme {
                 Surface(
@@ -85,7 +85,9 @@ class MainActivity : ComponentActivity() {
 
                     when {
                         permissionState.allPermissionsGranted -> {
-                            locationViewModel.handle(PermissionEvent.Granted)
+                            LaunchedEffect(Unit) {
+                                locationViewModel.handle(PermissionEvent.Granted)
+                            }
                         }
 
                         permissionState.shouldShowRationale -> {
@@ -95,7 +97,9 @@ class MainActivity : ComponentActivity() {
                         }
 
                         !permissionState.allPermissionsGranted && !permissionState.shouldShowRationale -> {
-                            locationViewModel.handle(PermissionEvent.Revoked)
+                            LaunchedEffect(Unit) {
+                                locationViewModel.handle(PermissionEvent.Revoked)
+                            }
                         }
                     }
 
@@ -125,7 +129,10 @@ class MainActivity : ComponentActivity() {
                                         },
                                         enabled = !hasLocationPermission()
                                     ) {
-                                        if (hasLocationPermission()) CircularProgressIndicator(modifier = Modifier.size(14.dp), color = Color.White)
+                                        if (hasLocationPermission()) CircularProgressIndicator(
+                                            modifier = Modifier.size(14.dp),
+                                            color = Color.White
+                                        )
                                         else Text("Settings")
                                     }
                                 }
@@ -167,10 +174,16 @@ fun MainScreen(currentPosition: LatLng, cameraState: CameraPositionState) {
         cameraPositionState = cameraState,
         properties = MapProperties(
             isMyLocationEnabled = true,
-            mapType = MapType.HYBRID, isTrafficEnabled = true
+            mapType = MapType.HYBRID,
+            isTrafficEnabled = true
         )
     ) {
-        Marker(state = MarkerState(position = marker), title = "Albrodiaz", snippet = "Marker")
+        Marker(
+            state = MarkerState(position = marker),
+            title = "MyPosition",
+            snippet = "This is a description of this Marker",
+            draggable = true
+        )
     }
 }
 
@@ -190,7 +203,7 @@ fun RationaleAlert(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Necesitamos los permisos de localización para poder utilizar esta aplicación",
+                    text = "We need location permissions to use this app",
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 TextButton(
