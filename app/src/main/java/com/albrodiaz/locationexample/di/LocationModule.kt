@@ -1,6 +1,8 @@
-package com.albrodiaz.locationexample.data
+package com.albrodiaz.locationexample.di
 
 import android.content.Context
+import com.albrodiaz.locationexample.data.ILocationService
+import com.albrodiaz.locationexample.data.LocationService
 import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
