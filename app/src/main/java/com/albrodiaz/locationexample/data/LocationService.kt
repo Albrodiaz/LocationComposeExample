@@ -38,10 +38,9 @@ class LocationService @Inject constructor(
 
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                super.onLocationResult(locationResult)
                 locationResult.locations.lastOrNull()?.let {
                     trySend(LatLng(it.latitude, it.longitude))
-                    Log.i("alberto", "onLocationResult: $it")
+                    Log.i("locationExample", "onLocationResult: $it")
                 }
             }
         }

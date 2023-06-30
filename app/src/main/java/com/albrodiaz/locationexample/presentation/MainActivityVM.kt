@@ -36,7 +36,6 @@ class MainActivityVM @Inject constructor(
             }
         }
     }
-
 }
 
 sealed interface ViewState {
